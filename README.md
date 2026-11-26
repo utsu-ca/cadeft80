@@ -38,6 +38,27 @@ python -m cadeft80 --mode parse --file eft_file.txt   # EFT -> JSON
 python -m cadeft80 --mode build --file eft_file.txt   # validate and re-emit
 ```
 
+CSV to EFT: the header must be exactly `name,institution id,transit,account,amount` (amount in dollars,
+institution id 3 digits, transit 5 digits). All invalid rows are reported (with line numbers) and no file is written.
+`--fif` optionally checks each institution + transit against a Payments Canada FIF export, as a CSV or a SQLite
+database (`--fif-table`, default `fif`). It needs `institution`/`transit` columns (e.g. `Institution Number`,
+`Branch Transit Number`) or one combined `routing number` column.
+
+```sh
+python -m cadeft80 --mode csv --file payees.csv --fif fif.csv \
+  --originator-id COMPANY12C --file-creation-number 1 --destination-data-centre 20366 \
+  --due-date 2026-12-01 --short-name "ACME PAYROLL" --long-name "ACME INC PAYROLL" \
+  --return-institution-id 001 --return-transit 00011 --return-account 1234567 > eft.txt
+```
+
+Build a FIF lookup CSV from the Payments Canada FIF PDF (needs `pypdf` or `pdftotext`; only the `001000550 00550-010`
+routing pairs are read), then pass it, or the PDF itself, to `--fif`:
+
+```sh
+python -m cadeft80 --mode fif --file fif.pdf > fif.csv
+python -m cadeft80 --mode fif --latest > fif.csv   # fetch the newest PDF from payments.ca
+```
+
 ## Testing
 
 ```sh

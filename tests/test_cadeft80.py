@@ -11,6 +11,67 @@ SAMPLE = "\r\n".join([
 ])
 
 
+CSV_ARGS = ["--mode", "csv", "--originator-id", "COMPANY12C", "--file-creation-number", "1",
+            "--destination-data-centre", "20366", "--creation-date", "2026-01-01",
+            "--due-date", "2026-01-05", "--short-name", "ACME", "--long-name", "ACME INC",
+            "--return-institution-id", "001", "--return-transit", "00011",
+            "--return-account", "1234567"]
+
+
+class CsvTests(unittest.TestCase):
+    def run_csv(self, text, *extra):
+        import subprocess, sys
+        return subprocess.run([sys.executable, "-m", "cadeft80", *CSV_ARGS, *extra], input=text.encode(),
+                              capture_output=True)
+
+    def test_csv_builds_valid_file(self):
+        res = self.run_csv("name,institution id,transit,account,amount\nJane Doe,002,12345,987654,12.34\n")
+        self.assertEqual(res.returncode, 0, res.stderr)
+        eft = parse_file80(res.stdout.decode())
+        eft.validate()
+        detail = eft.batches[0].details[0]
+        self.assertEqual((detail.amount, detail.institution_id, detail.name),
+                         (1234, "000212345", "JANE DOE"))
+
+    def test_csv_rejects_bad_header(self):
+        res = self.run_csv("name,institution id,transit,account\nA,002,12345,1\n")
+        self.assertEqual(res.returncode, 1)
+        self.assertIn("header", res.stderr.decode())
+
+    def test_csv_flags_all_invalid_rows_and_fif(self):
+        import tempfile, os
+        with tempfile.TemporaryDirectory() as d:
+            fif = os.path.join(d, "fif.csv")
+            with open(fif, "w") as f:
+                f.write("Institution Number,Branch Transit Number\n0002,12345\n")
+            res = self.run_csv("name,institution id,transit,account,amount\n"
+                               "OK,002,12345,1,1.00\nBAD,002,99999,1,1.00\nBAD2,002,12345,1,x\n",
+                               "--fif", fif)
+        err = res.stderr.decode()
+        self.assertEqual(res.returncode, 1)
+        self.assertIn("2 invalid row(s)", err)
+        self.assertIn("line 3", err)
+        self.assertIn("line 4", err)
+
+
+class FifPdfTests(unittest.TestCase):
+    def test_parse_routing_pairs(self):
+        from cadeft80.fif_pdf import parse_fif_text
+        text = ("100 MILE HOUSE, BC\n001000550 00550-010 CANADIAN IMPERIAL BANK OF COMMERCE 100 Mile House "
+                "Banking Centre, 1-325 Birch Ave, Box 98, 100 Mile 001000550 00550-010\n"
+                "000200123 00123-999 MISMATCH\n")
+        self.assertEqual(parse_fif_text(text), [("010", "00550")])
+
+
+class FifFetchTests(unittest.TestCase):
+    def test_find_latest_url(self):
+        from cadeft80.fif_fetch import find_latest_url
+        html = ('<a href="/sites/default/files/2026-10-01-Banks_Numeric_List.pdf">a</a>'
+                '<a href="https://www.payments.ca/sites/default/files/2026-11-20-Banks_Numeric_List.pdf">b</a>')
+        self.assertEqual(find_latest_url(html),
+                         "https://www.payments.ca/sites/default/files/2026-11-20-Banks_Numeric_List.pdf")
+
+
 class Eft80Tests(unittest.TestCase):
     def test_rejects_non_spec_characters(self):
         bad = SAMPLE.replace("PAYEE PAYOR", "PAYEE/PAYOR")
