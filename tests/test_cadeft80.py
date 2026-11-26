@@ -1,7 +1,6 @@
 import unittest
 
-from cadeft import ParseError, ValidationError
-from cadeft.eft80 import RECORD_LENGTH, Detail80, parse_file80
+from cadeft80 import ParseError, ValidationError, RECORD_LENGTH, Detail80, parse_file80
 
 SAMPLE = "\r\n".join([
     "ACOMPANY12C000002036600120",

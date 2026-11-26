@@ -1,3 +1,7 @@
+## v0.6.0
+
+Remove the CPA 005 1464-byte standard format; only the 80-byte format remains. The package is renamed to `cadeft80` and `cadeft.eft80` is merged into its top level.
+
 ## v0.5.0
 
 Bump, fix correctness for eft80.

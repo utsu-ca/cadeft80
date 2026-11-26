@@ -7,5 +7,4 @@ licensed under the Apache License, Version 2.0. This port is a derivative work
 and is distributed under the same license; see LICENSE.
 
 Changes: the Go implementation was re-implemented in Python, and the Go sources
-were removed. Behaviour is verified against the original Go implementation
-by the tests in tests/test_parity.py.
+were removed. Only the 80-byte record format is retained.

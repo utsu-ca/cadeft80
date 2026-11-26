@@ -8,11 +8,6 @@ permissions:
   contents: read
 
 jobs:
-  parity:
-    uses: ./.github/workflows/upstream-parity.yml
-    with:
-      limit: "1"
-
   build:
     runs-on: ubuntu-latest
     steps:
@@ -29,7 +24,7 @@ jobs:
           path: dist/
 
   github-release:
-    needs: [build, parity]
+    needs: [build]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -38,20 +33,16 @@ jobs:
         with:
           name: dist
           path: dist
-      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
-        with:
-          name: parity-report
-          path: .
-      - name: Create GitHub release with parity report
+      - name: Create GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "$GITHUB_REF_NAME" dist/* parity-report.md \
+          gh release create "$GITHUB_REF_NAME" dist/* \
             --repo "$GITHUB_REPOSITORY" --title "$GITHUB_REF_NAME" \
-            --notes-file parity-report.md
+            --generate-notes
 
   pypi:
-    needs: [build, parity]
+    needs: [build]
     runs-on: ubuntu-latest
     environment: pypi
     permissions:

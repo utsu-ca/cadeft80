@@ -1,13 +1,41 @@
-"""Payments Canada 80-byte (format TD) EFT records: A, X, C/D, Y and Z."""
+"""Python implementation of the 80-byte (TD) EFT file format: A, X, C/D, Y and Z records."""
 
 from __future__ import annotations
 
+__version__ = "0.6.0"
+
 from dataclasses import dataclass, field
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 import re
 from typing import Any
 
-from . import CadeftError, ParseError, ValidationError, eft_date, parse_date
+
+class CadeftError(ValueError):
+    """Base exception for parsing, validation, and serialization errors."""
+
+
+class ParseError(CadeftError):
+    """An EFT record could not be parsed."""
+
+
+class ValidationError(CadeftError):
+    """One or more EFT fields failed validation."""
+
+
+def parse_date(value: str) -> date:
+    if len(value) != 6 or not value.isdigit():
+        raise ValueError(f"invalid EFT date: {value}")
+    try:
+        return date(2000 + int(value[1:3]), 1, 1) + timedelta(days=int(value[3:]) - 1)
+    except (ValueError, OverflowError) as exc:
+        raise ValueError(f"invalid EFT date: {value}") from exc
+
+
+def eft_date(value: date | datetime | None) -> str:
+    if value is None:
+        return "000000"
+    return f"{value.year % 100:03d}{value.timetuple().tm_yday:03d}"
+
 
 RECORD_LENGTH = 80
 _ALLOWED = re.compile(r"[0-9A-Z =$.*,\-]*")
