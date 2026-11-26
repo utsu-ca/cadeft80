@@ -4,10 +4,10 @@ description:
   Let us know of a feature or request
 body:
   - type: textarea
-    id: cadeft-version
+    id: cadeft80-version
     attributes:
-      label: cadeft Version
-      description: What version of cadeft are you using?
+      label: cadeft80 Version
+      description: What version of cadeft80 are you using?
     validations:
       required: true
 
@@ -16,7 +16,7 @@ body:
     attributes:
       label: What were you trying to do?
       description: >
-        Describe how you were using the cadeft library. Include code samples,
+        Describe how you were using the cadeft80 library. Include code samples,
         errors, and stacktraces if appropriate.
     validations:
       required: true

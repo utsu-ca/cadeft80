@@ -3,14 +3,14 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "cadeft"
-version = "0.5.0"
-description = "Python library for reading and writing Payments Canada Standard 005 EFT files"
+name = "cadeft80"
+version = "0.6.0"
+description = "Python library for reading and writing 80-byte (TD) EFT files"
 readme = "README.md"
 requires-python = ">=3.10"
 license = "Apache-2.0"
 license-files = ["LICENSE", "NOTICE"]
-keywords = ["eft", "payments canada", "standard 005", "banking"]
+keywords = ["eft", "payments canada", "80 byte", "banking"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
@@ -21,7 +21,7 @@ classifiers = [
 dependencies = []
 
 [project.scripts]
-cadeft = "cadeft.__main__:main"
+cadeft80 = "cadeft80.__main__:main"
 
 [project.urls]
 Homepage = "https://github.com/protoconal/cadeft"
@@ -29,7 +29,7 @@ Issues = "https://github.com/protoconal/cadeft/issues"
 Upstream = "https://github.com/moov-io/cadeft"
 
 [tool.setuptools]
-packages = ["cadeft"]
+packages = ["cadeft80"]
 
 [tool.setuptools.package-data]
-cadeft = ["py.typed"]
+cadeft80 = ["py.typed"]
